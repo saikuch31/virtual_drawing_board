@@ -15,7 +15,7 @@ class DrawingCanvas:
     def __init__(
         self,
         frame_shape,
-        pen_color=config.PEN_COLOR,
+        pen_color,
         pen_thickness=config.PEN_THICKNESS,
     ):
         self.canvas = np.zeros(frame_shape, dtype=np.uint8)
@@ -47,6 +47,10 @@ class DrawingCanvas:
     def clear(self):
         """Erase all strokes."""
         self.canvas[:] = 0
+        self.previous_point = None
+
+    def lift_pen(self):
+        """Stop the current stroke without clearing the canvas."""
         self.previous_point = None
 
     def save(self, directory=config.SAVE_DIR):

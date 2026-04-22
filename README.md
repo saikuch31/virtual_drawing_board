@@ -12,6 +12,7 @@ virtual_drawing_board/
   camera.py            # Webcam access
   color_tracker.py     # HSV masking and contour tracking
   drawing_canvas.py    # Persistent drawing layer
+  pointer_colors.py    # Color presets and terminal prompt
   ui.py                # Windows, keyboard input, and display helpers
   requirements.txt
 ```
@@ -30,12 +31,20 @@ Start the app:
 python main.py
 ```
 
+Before the camera opens, the terminal prompts for a camera index. On macOS,
+this lets you avoid Continuity Camera by choosing the index for the Mac's
+built-in webcam and reusing that same index.
+
+Before the camera opens, the terminal prompts you to choose `red`, `green`, or
+`blue`. The drawing ink matches the selected pointer color.
+
 ## Controls
 
 - `q` or `Esc`: quit
 - `c`: clear drawing
 - `s`: save drawing to `drawings/`
 - `m`: show/hide the black-and-white color mask debug window
+- `t`: pause/resume pointer tracking
 
 The main window should show the normal color webcam feed. The color mask is a
 debug view used later for tuning object tracking.
@@ -45,10 +54,11 @@ debug view used later for tuning object tracking.
 When you run the app for the first time, macOS may ask for camera permission.
 Allow camera access for the terminal or IDE you are using to run Python.
 
+OpenCV on macOS usually selects cameras by index rather than by friendly device
+name in this setup. If your iPhone appears through Continuity Camera, pick the
+index that corresponds to the Mac webcam when prompted.
+
 ## Tuning
 
-The starter HSV range in `config.py` is set up for a blue object. If tracking is
-poor, adjust `HSV_LOWER`, `HSV_UPPER`, and `MIN_CONTOUR_AREA` for your lighting
-and object color.
-
-4/19 -- Got the webcam working but I'm wearing a blue sweatshirt so it keeps on latching onto that. I need to find a way for it to select a specific object. I also want to add hand sign recognition technology as well. 
+The default HSV presets live in `pointer_colors.py`. If tracking is poor for a
+selected color, adjust those ranges for your lighting and object color.

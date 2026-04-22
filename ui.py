@@ -1,6 +1,7 @@
 """Display and keyboard handling."""
 
 import cv2
+import numpy as np
 
 import config
 
@@ -9,17 +10,22 @@ QUIT_KEYS = {ord("q"), 27}
 CLEAR_KEY = ord("c")
 SAVE_KEY = ord("s")
 DEBUG_MASK_KEY = ord("m")
+TRACKING_TOGGLE_KEY = ord("t")
 _mask_window_open = False
 
 
-def draw_hud(frame, center, contour_area):
+def draw_hud(frame, center, contour_area, color_name, tracking_enabled):
     """Draw basic status text on the output frame."""
-    status = "tracking" if center is not None else "not tracking"
-    help_text = "q: quit | c: clear | s: save | m: mask"
+    if not tracking_enabled:
+        status = "tracking paused"
+    else:
+        status = "tracking" if center is not None else "not tracking"
+
+    help_text = "q: quit | c: clear | s: save | m: mask | t: track"
 
     cv2.putText(
         frame,
-        f"{status} | area: {int(contour_area)}",
+        f"{status} | pointer: {color_name} | area: {int(contour_area)}",
         (12, 28),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.7,
@@ -64,3 +70,18 @@ def read_key(delay=1):
 
 def close_windows():
     cv2.destroyAllWindows()
+
+
+def paused_tracking_result(frame_shape):
+    """Return a blank tracking result while recognition is paused."""
+    height, width = frame_shape[:2]
+    mask = np.zeros((height, width), dtype=np.uint8)
+    return type(
+        "PausedTrackingResult",
+        (),
+        {
+            "center": None,
+            "mask": mask,
+            "contour_area": 0.0,
+        },
+    )()

@@ -11,7 +11,7 @@ class Camera:
     def __init__(self, index=config.CAMERA_INDEX, flip=config.FLIP_CAMERA):
         self.index = index
         self.flip = flip
-        self.capture = cv2.VideoCapture(index)
+        self.capture = cv2.VideoCapture(index, cv2.CAP_AVFOUNDATION)
 
         if not self.capture.isOpened():
             raise RuntimeError(f"Could not open webcam at index {index}.")
@@ -30,3 +30,18 @@ class Camera:
     def release(self):
         """Release the camera device."""
         self.capture.release()
+
+
+def find_available_cameras(search_range=config.CAMERA_SEARCH_RANGE):
+    """Return camera indexes that OpenCV can open on this machine."""
+    available_indexes = []
+
+    for index in search_range:
+        capture = cv2.VideoCapture(index, cv2.CAP_AVFOUNDATION)
+        if capture.isOpened():
+            success, _ = capture.read()
+            if success:
+                available_indexes.append(index)
+        capture.release()
+
+    return available_indexes

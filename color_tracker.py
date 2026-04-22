@@ -20,18 +20,22 @@ class ColorTracker:
 
     def __init__(
         self,
-        hsv_lower=config.HSV_LOWER,
-        hsv_upper=config.HSV_UPPER,
+        hsv_ranges,
         min_contour_area=config.MIN_CONTOUR_AREA,
     ):
-        self.hsv_lower = np.array(hsv_lower, dtype=np.uint8)
-        self.hsv_upper = np.array(hsv_upper, dtype=np.uint8)
+        self.hsv_ranges = [
+            (
+                np.array(lower, dtype=np.uint8),
+                np.array(upper, dtype=np.uint8),
+            )
+            for lower, upper in hsv_ranges
+        ]
         self.min_contour_area = min_contour_area
 
     def track(self, frame):
         """Return the tracked center point, debug mask, and contour area."""
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(hsv, self.hsv_lower, self.hsv_upper)
+        mask = self._build_mask(hsv)
         mask = self._clean_mask(mask)
 
         contours, _ = cv2.findContours(
@@ -61,6 +65,15 @@ class ColorTracker:
             mask=mask,
             contour_area=contour_area,
         )
+
+    def _build_mask(self, hsv_frame):
+        mask = None
+
+        for lower, upper in self.hsv_ranges:
+            current_mask = cv2.inRange(hsv_frame, lower, upper)
+            mask = current_mask if mask is None else cv2.bitwise_or(mask, current_mask)
+
+        return mask
 
     @staticmethod
     def _clean_mask(mask):
